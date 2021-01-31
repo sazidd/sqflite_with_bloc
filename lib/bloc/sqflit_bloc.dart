@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:equatable/equatable.dart';
 import 'package:sqflit/db/student_provider.dart';
 import 'package:sqflit/models/student.dart';
 
@@ -10,19 +9,17 @@ part 'sqflit_state.dart';
 
 class SqflitBloc extends Bloc<SqflitEvent, SqflitState> {
   final StudentProvider studentProvider;
-  List<Student> st;
+  List<Student> student = [];
+  List<Student> studentUpdate = [];
 
   SqflitBloc({this.studentProvider}) : super(SqflitInitial());
 
   @override
-  Stream<SqflitState> mapEventToState(
-    SqflitEvent event,
-  ) async* {
-    // yield SqflitLoading();
+  Stream<SqflitState> mapEventToState(SqflitEvent event) async* {
     if (event is GetStudentList) {
       yield SqflitLoading();
       try {
-        final student = await studentProvider.getStudentList();
+        student = await studentProvider.getStudentList();
         print('getstudent------------------------- $student');
         yield student != null
             ? SqflitLoaded(student: student)
@@ -40,32 +37,34 @@ class SqflitBloc extends Bloc<SqflitEvent, SqflitState> {
         yield SqflitError(errorMessage: e.toString());
       }
     } else if (event is UpdateStudent) {
+      studentUpdate = [];
       try {
-        final student = await studentProvider.updateStudent(event.student);
+        studentUpdate = await studentProvider.updateStudent(event.student);
         print('update------------------------- ${student}');
-        yield SqflitLoaded(student: student);
         yield SqflitLoading();
+        yield SqflitLoaded(student: studentUpdate);
       } catch (e) {
         yield SqflitError(errorMessage: e.toString());
       }
     } else if (event is DeleteStudent) {
       final id = await studentProvider.deleteStudent(event.student.id);
       if (id == 1) {
-        st = await studentProvider.getStudentList();
-        yield SqflitLoaded(student: st);
+        studentUpdate = [];
+        studentUpdate = await studentProvider.getStudentList();
+        yield SqflitLoaded(student: studentUpdate);
       }
-      // try {
-      //   final student = await studentProvider.deleteStudent(event.student);
-      //   List<Student> students = [];
+    } else if (event is SearchStudent) {
+      print('Query----------- ${event.query}');
+      var dummyListData = List<Student>();
+      student.forEach((stud) {
+        var st2 = Student(id: stud.id, name: stud.name);
+        print('st2-------------------------- ${st2.name}');
+        if (st2.name.toLowerCase().contains(event.query.toLowerCase())) {
+          dummyListData.add(stud);
+        }
+      });
 
-      //   // students.where((st) => st.id == student.id);
-
-      //   // students.firstWhere((st) => st.id == student.id, orElse: () => null);
-      //   print('delete------------------------- ${student}');
-      //   yield SqflitLoaded(student: students);
-      // } catch (e) {
-      //   yield SqflitError(errorMessage: e.toString());
-      // }
+      yield SqflitLoaded(student: dummyListData);
     }
   }
 }

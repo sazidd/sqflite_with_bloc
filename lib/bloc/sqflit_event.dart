@@ -1,6 +1,6 @@
 part of 'sqflit_bloc.dart';
 
-abstract class SqflitEvent extends Equatable {
+abstract class SqflitEvent {
   const SqflitEvent();
 
   @override
@@ -39,4 +39,13 @@ class DeleteStudent extends SqflitEvent {
 
   @override
   List<Object> get props => [student];
+}
+
+class SearchStudent extends SqflitEvent {
+  final String query;
+
+  const SearchStudent({this.query});
+
+  @override
+  List<Object> get props => [query];
 }

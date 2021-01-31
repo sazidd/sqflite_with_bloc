@@ -1,6 +1,6 @@
 part of 'sqflit_bloc.dart';
 
-abstract class SqflitState extends Equatable {
+abstract class SqflitState {
   const SqflitState();
 
   @override

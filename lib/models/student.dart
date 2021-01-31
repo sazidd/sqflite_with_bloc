@@ -5,6 +5,16 @@ class Student {
   Student({this.id, this.name});
 
   Map<String, dynamic> toMap() {
-    return {'name': name};
+    return {
+      'id': id,
+      'name': name,
+    };
+  }
+
+  factory Student.fromMap(Map<String, dynamic> map) {
+    return Student(
+      id: map['id'],
+      name: map['name'],
+    );
   }
 }
